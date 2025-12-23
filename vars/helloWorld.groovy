@@ -1,3 +1,5 @@
-def call(String name = 'human') {
-    echo "Hello, ${name} from a shared library"
+import org.example.namespace
+
+def call(String name = 'user') {
+    Hello.sayHello(this, name)
 }
