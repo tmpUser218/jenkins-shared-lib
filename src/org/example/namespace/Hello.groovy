@@ -1,4 +1,4 @@
-package org.example
+package org.example.namespace
 
 class Hello {
     static void sayHello(script, String name) {
