@@ -1,4 +1,4 @@
-package org.example.namespace
+package org.example.Services
 
 class HelloService {
     static void sayHello(script, String name) {
