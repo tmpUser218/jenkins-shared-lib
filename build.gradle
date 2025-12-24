@@ -1,0 +1,34 @@
+plugins {
+    id 'groovy'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.jenkins-ci.org/releases/' }
+}
+
+dependencies {
+    implementation localGroovy()
+    testImplementation localGroovy()
+
+    testImplementation 'com.lesfurets:jenkins-pipeline-unit:1.16'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.spockframework:spock-core:2.4-M1-groovy-3.0'
+    testImplementation 'net.bytebuddy:byte-buddy:1.14.8'
+    testImplementation 'org.objenesis:objenesis:3.3'
+}
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['src']
+            exclude 'vars/**'
+        }
+    }
+    test {
+        groovy {
+            srcDirs = ['test']
+        }
+    }
+}
