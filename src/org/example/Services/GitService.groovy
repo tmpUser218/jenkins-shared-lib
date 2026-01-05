@@ -84,45 +84,14 @@ class GitService implements Serializable {
 
 
     /**
-     * Reads a YAML value from a Git ref without using yq
-     * Supports simple and nested keys (e.g. image.tag)
+     * Internal helper to extract a YAML key value from a Git ref
      */
-    private String readYamlValue(
-            String gitRef,
-            String filePath,
-            String yamlKey
-    ) {
+    private String readYamlValue(String gitRef, String filePath, String yamlKey) {
         return steps.bat(
                 script: """
-        powershell -Command "
-        \$content = git show ${gitRef}:${filePath}
-
-        \$keys = '${yamlKey}'.Split('.')
-        \$indent = 0
-        \$value = \$null
-
-        foreach (\$line in \$content -split '\\n') {
-            if (\$line -match '^\\s*#') { continue }
-
-            \$currentIndent = (\$line.Length - \$line.TrimStart().Length)
-
-            if (\$line -match '^\\s*' + \$keys[\$indent] + '\\s*:') {
-                if (\$indent -eq \$keys.Length - 1) {
-                    \$value = (\$line -split ':', 2)[1].Trim()
-                    break
-                }
-                \$indent++
-                continue
-            }
-
-            if (\$currentIndent -lt (\$indent * 2)) {
-                \$indent = 0
-            }
-        }
-
-        Write-Output \$value
-        "
-        """,
+                git show ${gitRef}:${filePath} \
+                | yq e '.${yamlKey}' -
+            """,
                 returnStdout: true
         ).trim()
     }
