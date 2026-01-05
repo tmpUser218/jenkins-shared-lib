@@ -89,7 +89,7 @@ class GitService implements Serializable {
     private String readYamlValue(String gitRef, String filePath, String yamlKey) {
         return steps.bat(
                 script: """
-                git show ${gitRef}:${filePath} \
+                @git show ${gitRef}:${filePath} \
                 | yq e .${yamlKey} -
             """,
                 returnStdout: true
