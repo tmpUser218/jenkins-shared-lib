@@ -90,7 +90,7 @@ class GitService implements Serializable {
         return steps.bat(
                 script: """
                 git show ${gitRef}:${filePath} \
-                | yq e '.${yamlKey}' -
+                | yq e .${yamlKey} -
             """,
                 returnStdout: true
         ).trim()
