@@ -56,7 +56,7 @@ class GitService implements Serializable {
     ) {
         steps.echo "🔎 Checking merge validity: ${sourceBranch} -> ${targetBranch}"
 
-        int status = steps.sh(
+        int status = steps.bat(
                 script: """
             git fetch origin
             git checkout ${targetBranch}
@@ -68,7 +68,7 @@ class GitService implements Serializable {
         )
 
         // Abort merge if Git entered merge state
-        steps.sh(
+        steps.bat(
                 script: "git merge --abort || true",
                 returnStatus: true
         )
@@ -84,14 +84,45 @@ class GitService implements Serializable {
 
 
     /**
-     * Internal helper to extract a YAML key value from a Git ref
+     * Reads a YAML value from a Git ref without using yq
+     * Supports simple and nested keys (e.g. image.tag)
      */
-    private String readYamlValue(String gitRef, String filePath, String yamlKey) {
+    private String readYamlValue(
+            String gitRef,
+            String filePath,
+            String yamlKey
+    ) {
         return steps.bat(
                 script: """
-                git show ${gitRef}:${filePath} \
-                | yq e '.${yamlKey}' -
-            """,
+        powershell -Command "
+        \$content = git show ${gitRef}:${filePath}
+
+        \$keys = '${yamlKey}'.Split('.')
+        \$indent = 0
+        \$value = \$null
+
+        foreach (\$line in \$content -split '\\n') {
+            if (\$line -match '^\\s*#') { continue }
+
+            \$currentIndent = (\$line.Length - \$line.TrimStart().Length)
+
+            if (\$line -match '^\\s*' + \$keys[\$indent] + '\\s*:') {
+                if (\$indent -eq \$keys.Length - 1) {
+                    \$value = (\$line -split ':', 2)[1].Trim()
+                    break
+                }
+                \$indent++
+                continue
+            }
+
+            if (\$currentIndent -lt (\$indent * 2)) {
+                \$indent = 0
+            }
+        }
+
+        Write-Output \$value
+        "
+        """,
                 returnStdout: true
         ).trim()
     }
