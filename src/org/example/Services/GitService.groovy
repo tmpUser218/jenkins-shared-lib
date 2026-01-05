@@ -54,7 +54,7 @@ class GitService implements Serializable {
             String sourceBranch,
             String targetBranch
     ) {
-        steps.echo "🔎 Checking merge validity: ${sourceBranch} -> ${targetBranch}"
+        steps.echo "Checking merge validity: ${sourceBranch} -> ${targetBranch}"
 
         int status = steps.bat(
                 script: """
