@@ -29,19 +29,22 @@ class GitService implements Serializable {
     }
 
     /**
-     * Merge current branch into production branch
+     * Merge source branch into production branch
      */
     void mergeToProduction(
             String productionBranch = 'production',
             String sourceBranch = 'HEAD'
     ) {
-        steps.echo "Merging ${sourceBranch} into ${productionBranch}"
-
         steps.bat """
+            set -e
+
             git fetch origin
+
             git checkout ${productionBranch}
             git pull origin ${productionBranch}
-            git merge --no-ff ${sourceBranch} -m "Merge ${sourceBranch} into ${productionBranch}"
+
+            git merge --no-ff ${sourceBranch}
+
             git push origin ${productionBranch}
         """
     }
@@ -54,34 +57,26 @@ class GitService implements Serializable {
             String sourceBranch,
             String targetBranch
     ) {
-        steps.echo "Checking merge validity: ${sourceBranch} -> ${targetBranch}"
+        try {
+            steps.bat """
+                set -e
 
-        int status = steps.bat(
-                script: """
-            git fetch origin
-            git checkout ${targetBranch}
-            git pull origin ${targetBranch}
+                git fetch origin
 
-            git merge --no-commit --no-ff ${sourceBranch} || true
-        """,
-                returnStatus: true
-        )
+                git checkout ${targetBranch}
+                git pull origin ${targetBranch}
 
-        // Abort merge if Git entered merge state
-        steps.bat(
-                script: "git merge --abort || true",
-                returnStatus: true
-        )
+                git merge --no-commit --no-ff ${sourceBranch}
 
-        if (status == 0) {
-            steps.echo "Merge is valid (no conflicts)"
+                git merge --abort
+            """
             return true
+        } catch (Exception e) {
+            // Cleanup in case merge partially applied
+            steps.bat 'git merge --abort || true'
+            return false
         }
-
-        steps.echo "Merge conflicts detected"
-        return false
     }
-
 
     /**
      * Internal helper to extract a YAML key value from a Git ref
@@ -95,4 +90,5 @@ class GitService implements Serializable {
                 returnStdout: true
         ).trim()
     }
+
 }
