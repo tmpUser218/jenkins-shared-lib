@@ -61,6 +61,9 @@ class GitService implements Serializable {
             steps.bat """
                 set -e
 
+                git config --global user.email "Jenkins@example.com"
+                git config --global user.name "Jenkins Machine"
+
                 git fetch origin
 
                 git checkout ${targetBranch}
