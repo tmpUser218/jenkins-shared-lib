@@ -38,15 +38,17 @@ class GitService implements Serializable {
         steps.bat """
             set -e
 
+            git config --global user.email "Jenkins@example.com"
+            git config --global user.name "Jenkins Machine"
+
             git fetch origin
 
             git checkout ${productionBranch}
             git pull origin ${productionBranch}
 
             git merge --no-ff ${sourceBranch}
-
-            git push origin ${productionBranch}
         """
+            // git push origin ${productionBranch}
     }
 
     /**
@@ -71,7 +73,7 @@ class GitService implements Serializable {
 
                 git merge --no-commit --no-ff ${sourceBranch}
 
-                 # Check if merge succeeded (no conflicts)
+                REM Check if merge succeeded (no conflicts)
                 if %errorlevel% neq 0 (
                     exit 1
                 )
