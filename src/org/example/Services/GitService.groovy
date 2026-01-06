@@ -71,6 +71,11 @@ class GitService implements Serializable {
 
                 git merge --no-commit --no-ff ${sourceBranch}
 
+                 # Check if merge succeeded (no conflicts)
+                if %errorlevel% neq 0 (
+                    exit 1
+                )
+
                 git merge --abort
             """
             return true
