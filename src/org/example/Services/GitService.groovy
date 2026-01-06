@@ -47,8 +47,8 @@ class GitService implements Serializable {
             git pull origin ${productionBranch}
 
             git merge --no-ff ${sourceBranch}
+            git push origin ${productionBranch}
         """
-            // git push origin ${productionBranch}
     }
 
     /**
